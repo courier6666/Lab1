@@ -1,5 +1,4 @@
-﻿const int BLACK = 1;
-const int WHITE = 2;
+﻿const int WinningLength = 5;
 
 static bool IsWinningMove(int[,] board, int x, int y, int player)
 {
@@ -8,16 +7,16 @@ static bool IsWinningMove(int[,] board, int x, int y, int player)
     // Directions: horizontal, vertical, diagonal (top-left to bottom-right), diagonal (top-right to bottom-left)
     int[][] directions = new int[][]
     {
-        new int[] { 0, 1 }, // horizontal
-        new int[] { 1, 0 }, // vertical
-        new int[] { -1, 1 }, // diagonal (bottom-left to top-right)
-        new int[] { 1, 1 } // diagonal (top-left to bottom-right)
+        [ 0, 1 ], // horizontal
+        [ 1, 0 ], // vertical
+        [ -1, 1 ], // diagonal (bottom-left to top-right)
+        [ 1, 1 ] // diagonal (top-left to bottom-right)
     };
     foreach (var dir in directions)
     {
         int count = 1; // Count the current stone
         // Check in the positive direction
-        for (int step = 1; step < 5; ++step)
+        for (int step = 1; step < WinningLength; ++step)
         {
             int nx = x + dir[0] * step;
             int ny = y + dir[1] * step;
@@ -53,16 +52,16 @@ static int[,] ParseRenjuBoard(string[] lines)
     for (int i = 0; i < N; ++i)
     {
         var values = lines[i].Split(' ', StringSplitOptions.RemoveEmptyEntries);
-        if (values.Length > M)
+        if (values.Length != M)
         {
-            throw new FormatException($"Line {i - 1} has more than {M} values.");
+            throw new FormatException($"Expected {M} columns of board data, but found {values.Length}.");
         }
 
         int[] valuesInt = values.Select(int.Parse).ToArray();
 
         if (valuesInt.Any(v => v < 0 || v > 2))
         {
-            throw new FormatException($"Line {i - 1} contains invalid values. Only 0, 1, and 2 are allowed.");
+            throw new FormatException($"Line {i} contains invalid values. Only 0, 1, and 2 are allowed.");
         }
 
         for (int j = 0; j < M; ++j)
@@ -75,14 +74,16 @@ static int[,] ParseRenjuBoard(string[] lines)
 }
 
 var content = await File.ReadAllLinesAsync("input.txt");
+
 var tests = int.Parse(content[0]);
-content = content[1..];
-var output = new StreamWriter("output.txt", append: false);
+int currentIndex = 1;
+
+using var output = new StreamWriter("output.txt", append: false);
 
 while (tests-- > 0)
 {
-    var currentContent = content[0..19];
-    content = content[19..];
+    var currentContent = content[currentIndex..(currentIndex + 19)];
+    currentIndex += 19;
 
     var board = ParseRenjuBoard(currentContent);
 
@@ -92,16 +93,10 @@ while (tests-- > 0)
     {
         for (int j = 0; j < 19; ++j)
         {
-            if (board[i, j] == BLACK && IsWinningMove(board, i, j, BLACK))
+            var stone = board[i, j];
+            if (stone != (int)Stone.Empty && IsWinningMove(board, i, j, stone))
             {
-                await output.WriteLineAsync("1");
-                await output.WriteLineAsync($"{i + 1} {j + 1}");
-                anyWon = true;
-                break;
-            }
-            else if (board[i, j] == WHITE && IsWinningMove(board, i, j, WHITE))
-            {
-                await output.WriteLineAsync("2");
+                await output.WriteLineAsync(stone.ToString());
                 await output.WriteLineAsync($"{i + 1} {j + 1}");
                 anyWon = true;
                 break;
@@ -125,3 +120,10 @@ while (tests-- > 0)
 
 await output.FlushAsync();
 output.Close();
+
+enum Stone
+{
+    Empty,
+    Black,
+    White
+}
