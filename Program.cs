@@ -1,4 +1,5 @@
 ﻿const int WinningLength = 5;
+const int BoardSize = 19;
 
 static bool IsWinningMove(int[,] board, int x, int y, int player)
 {
@@ -39,8 +40,8 @@ static bool IsWinningMove(int[,] board, int x, int y, int player)
 
 static int[,] ParseRenjuBoard(string[] lines)
 {
-    int N = 19;
-    int M = 19;
+    int N = BoardSize;
+    int M = BoardSize;
 
     var board = new int[N, M];
 
@@ -82,16 +83,16 @@ using var output = new StreamWriter("output.txt", append: false);
 
 while (tests-- > 0)
 {
-    var currentContent = content[currentIndex..(currentIndex + 19)];
-    currentIndex += 19;
+    var currentContent = content[currentIndex..(currentIndex + BoardSize)];
+    currentIndex += BoardSize;
 
     var board = ParseRenjuBoard(currentContent);
 
     bool anyWon = false;
 
-    for (int i = 0; i < 19; ++i)
+    for (int i = 0; i < BoardSize; ++i)
     {
-        for (int j = 0; j < 19; ++j)
+        for (int j = 0; j < BoardSize; ++j)
         {
             var stone = board[i, j];
             if (stone != (int)Stone.Empty && IsWinningMove(board, i, j, stone))
