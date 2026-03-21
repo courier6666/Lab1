@@ -1,23 +1,27 @@
 ﻿const int WinningLength = 5;
 const int BoardSize = 19;
 
-static bool IsWinningMove(int[,] board, int x, int y, int player)
+int step = 1;
+
+// Directions: horizontal, vertical, diagonal (top-left to bottom-right), diagonal (top-right to bottom-left)
+int[][] Directions = new int[][]
 {
-    int N = board.GetLength(0);
-    int M = board.GetLength(1);
-    // Directions: horizontal, vertical, diagonal (top-left to bottom-right), diagonal (top-right to bottom-left)
-    int[][] directions = new int[][]
-    {
         [ 0, 1 ], // horizontal
         [ 1, 0 ], // vertical
         [ -1, 1 ], // diagonal (bottom-left to top-right)
         [ 1, 1 ] // diagonal (top-left to bottom-right)
-    };
-    foreach (var dir in directions)
+};
+
+bool IsWinningMove(int[,] board, int x, int y, int player)
+{
+    int N = board.GetLength(0);
+    int M = board.GetLength(1);
+
+    foreach (var dir in Directions)
     {
         int count = 1; // Count the current stone
         // Check in the positive direction
-        for (int step = 1; step < WinningLength; ++step)
+        for (step = 1; step < WinningLength; ++step)
         {
             int nx = x + dir[0] * step;
             int ny = y + dir[1] * step;
