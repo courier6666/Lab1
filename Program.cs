@@ -34,7 +34,7 @@ bool IsWinningMove(int[,] board, int x, int y, int player)
                 break;
             }
         }
-        if (count >= 5)
+        if (count >= WinningLength)
         {
             return true;
         }
@@ -78,9 +78,37 @@ static int[,] ParseRenjuBoard(string[] lines)
     return board;
 }
 
+static void ValidateBoard(int[,] board)
+{
+    var countBlack = board.Cast<int>().Count(v => v == (int)Stone.Black);
+    var countWhite = board.Cast<int>().Count(v => v == (int)Stone.White);
+
+    if (countBlack != countWhite && countBlack != countWhite + 1)
+    {
+        throw new FormatException($"Invalid board state. Black has {countBlack} stones and White has {countWhite} stones.");
+    }
+}
+
 var content = await File.ReadAllLinesAsync("input.txt");
 
-var tests = int.Parse(content[0]);
+if (content.Length == 0)
+{
+    Console.WriteLine("Empty file.");
+    return;
+}
+
+if (!int.TryParse(content[0], out var tests))
+{
+    Console.WriteLine("Invalid number of test cases.");
+    return;
+}
+
+if ((content.Length - 1) % 19 != 0)
+{
+    Console.WriteLine("Invalid board test data. Each board in test case should consist of 19 lines.");
+    return;
+}
+
 int currentIndex = 1;
 
 using var output = new StreamWriter("output.txt", append: false);
@@ -90,7 +118,18 @@ while (tests-- > 0)
     var currentContent = content[currentIndex..(currentIndex + BoardSize)];
     currentIndex += BoardSize;
 
-    var board = ParseRenjuBoard(currentContent);
+    int[,] board = ParseRenjuBoard(currentContent);
+
+    try
+    {
+        board = ParseRenjuBoard(currentContent);
+        ValidateBoard(board);
+    }
+    catch (Exception ex)
+    {
+        await output.WriteLineAsync("Invalid test case skipped. " + ex.Message);
+        continue;
+    }
 
     bool anyWon = false;
 
