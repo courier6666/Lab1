@@ -99,7 +99,7 @@ if (!int.TryParse(content[0], out var tests))
 
 if ((content.Length - 1) % BoardSize != 0)
 {
-    Console.WriteLine("Invalid board test data. Each board in test case should consist of 19 lines.");
+    Console.WriteLine($"Invalid board test data. Each board in test case should consist of {BoardSize} lines.");
     return;
 }
 
