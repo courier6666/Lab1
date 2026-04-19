@@ -14,9 +14,6 @@ int[][] Directions = new int[][]
 
 bool IsWinningMove(int[,] board, int x, int y, int player)
 {
-    int N = board.GetLength(0);
-    int M = board.GetLength(1);
-
     foreach (var dir in Directions)
     {
         int count = 1; // Count the current stone
@@ -25,7 +22,7 @@ bool IsWinningMove(int[,] board, int x, int y, int player)
         {
             int nx = x + dir[0] * step;
             int ny = y + dir[1] * step;
-            if (nx >= 0 && nx < N && ny >= 0 && ny < M && board[nx, ny] == player)
+            if (nx >= 0 && nx < BoardSize && ny >= 0 && ny < BoardSize && board[nx, ny] == player)
             {
                 count++;
             }
@@ -44,22 +41,19 @@ bool IsWinningMove(int[,] board, int x, int y, int player)
 
 static int[,] ParseRenjuBoard(string[] lines)
 {
-    int N = BoardSize;
-    int M = BoardSize;
+    var board = new int[BoardSize, BoardSize];
 
-    var board = new int[N, M];
-
-    if (lines.Length != N)
+    if (lines.Length != BoardSize)
     {
-        throw new FormatException($"Expected {N} lines of board data, but found {lines.Length}.");
+        throw new FormatException($"Expected {BoardSize} lines of board data, but found {lines.Length}.");
     }
 
-    for (int i = 0; i < N; ++i)
+    for (int i = 0; i < BoardSize; ++i)
     {
         var values = lines[i].Split(' ', StringSplitOptions.RemoveEmptyEntries);
-        if (values.Length != M)
+        if (values.Length != BoardSize)
         {
-            throw new FormatException($"Expected {M} columns of board data, but found {values.Length}.");
+            throw new FormatException($"Expected {BoardSize} columns of board data, but found {values.Length}.");
         }
 
         int[] valuesInt = values.Select(int.Parse).ToArray();
@@ -69,7 +63,7 @@ static int[,] ParseRenjuBoard(string[] lines)
             throw new FormatException($"Line {i} contains invalid values. Only 0, 1, and 2 are allowed.");
         }
 
-        for (int j = 0; j < M; ++j)
+        for (int j = 0; j < BoardSize; ++j)
         {
             board[i, j] = valuesInt[j];
         }
@@ -103,7 +97,7 @@ if (!int.TryParse(content[0], out var tests))
     return;
 }
 
-if ((content.Length - 1) % 19 != 0)
+if ((content.Length - 1) % BoardSize != 0)
 {
     Console.WriteLine("Invalid board test data. Each board in test case should consist of 19 lines.");
     return;
@@ -133,7 +127,7 @@ while (tests-- > 0)
 
     bool anyWon = false;
 
-    for (int i = 0; i < BoardSize; ++i)
+    for (int i = 0; i < BoardSize && !anyWon; ++i)
     {
         for (int j = 0; j < BoardSize; ++j)
         {
@@ -146,20 +140,13 @@ while (tests-- > 0)
                 break;
             }
         }
-
-        if (anyWon)
-        {
-            break;
-        }
     }
 
-    if (anyWon)
+    if (!anyWon)
     {
-        continue;
+        await output.WriteLineAsync("0");
+        await output.FlushAsync();
     }
-
-    await output.WriteLineAsync("0");
-    await output.FlushAsync();
 }
 
 await output.FlushAsync();
